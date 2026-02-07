@@ -145,6 +145,66 @@ void set_rational_bezier_curve2d_weight(void* curve, int index, double w) {
     ((WCurvInt::RationalBezierCurve2d*)curve)->Weights[index] = w;
 }
 
+void calculate_curve_point(void* curve, double t, double& x, double& y) {
+    switch (((WCurvInt::Curve2d*)curve)->Type) {
+    case WCurvInt::CurveType::Line2d: {
+            WCurvInt::Line2d* line = (WCurvInt::Line2d*)curve;
+            WGVector2d point = line->StartPoint * (1 - t) + line->EndPoint * t;
+            x = point.X;
+            y = point.Y;
+            break;
+        }
+    case WCurvInt::CurveType::Arc2d: {
+            WCurvInt::Arc2d* arc = (WCurvInt::Arc2d*)curve;
+            double a = arc->StartAngle + arc->DeltaAngle * t;
+            WGVector2d point = arc->Center + WGVector2d(arc->Radius * cos(a), arc->Radius * sin(a));
+            x = point.X;
+            y = point.Y;
+            break;
+        }
+    case WCurvInt::CurveType::BezierCurve2d: {
+            WCurvInt::BezierCurve2d* bezier_curve = (WCurvInt::BezierCurve2d*)curve;
+            if (bezier_curve->Degree >= 16) {
+                throw;
+            }
+            double xs[16];
+            double ys[16];
+            for (int i = 0; i <= bezier_curve->Degree; ++i) {
+                xs[i] = bezier_curve->ControlPoints[i].X;
+                ys[i] = bezier_curve->ControlPoints[i].Y;
+            }
+            WSBernsteinCalculator::SubMinSection(bezier_curve->Degree, xs, t);
+            WSBernsteinCalculator::SubMinSection(bezier_curve->Degree, ys, t);
+            x = xs[bezier_curve->Degree];
+            y = ys[bezier_curve->Degree];
+            break;
+        }
+    case WCurvInt::CurveType::RationalBezierCurve2d: {
+            WCurvInt::RationalBezierCurve2d* rational_bezier_curve = (WCurvInt::RationalBezierCurve2d*)curve;
+            if (rational_bezier_curve->Degree >= 16) {
+                throw;
+            }
+            double xs[16];
+            double ys[16];
+            double ws[16];
+            for (int i = 0; i <= rational_bezier_curve->Degree; ++i) {
+                xs[i] = rational_bezier_curve->ControlPoints[i].X * rational_bezier_curve->Weights[i];
+                ys[i] = rational_bezier_curve->ControlPoints[i].Y * rational_bezier_curve->Weights[i];
+                ws[i] = rational_bezier_curve->Weights[i];
+            }
+            WSBernsteinCalculator::SubMinSection(rational_bezier_curve->Degree, xs, t);
+            WSBernsteinCalculator::SubMinSection(rational_bezier_curve->Degree, ys, t);
+            WSBernsteinCalculator::SubMinSection(rational_bezier_curve->Degree, ws, t);
+            x = xs[rational_bezier_curve->Degree] / ws[rational_bezier_curve->Degree];
+            y = ys[rational_bezier_curve->Degree] / ws[rational_bezier_curve->Degree];
+            break;
+        }
+    default: {
+            throw;
+        }
+    }
+}
+
 void free_curve2d(void* curve) {
     delete (WCurvInt::Curve2d*)curve;
 }

@@ -32,6 +32,8 @@ WCURVINT_API_C void* new_rational_bezier_curve2d(int degree);
 WCURVINT_API_C void set_rational_bezier_curve2d_control_point(void* curve, int index, double x, double y);
 WCURVINT_API_C void set_rational_bezier_curve2d_weight(void* curve, int index, double w);
 
+WCURVINT_API_C void calculate_curve_point(void* curve, double t, double& x, double& y);
+
 WCURVINT_API_C void free_curve2d(void* curve);
 
 WCURVINT_API_C void* new_curve_curve_intersections(void* curve0, void* curve1, double distance_epsilon);
