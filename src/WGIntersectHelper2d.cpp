@@ -4380,60 +4380,70 @@ int WGIntersectHelper2d::LineLineIntersect(const WGVector2d& start_point0, const
                 double d1 = vt1.Dot(vt1);
                 WGVector2d start_vt01 = start_point1 - start_point0;
                 WGVector2d end_vt01 = end_point1 - end_point0;
-                ts0[tc] = start_vt01.Dot(vt0) / d0;
-                if (ts0[tc] < 0) {
-                    ts0[tc] = 0;
-                }
-                if (ts0[tc] > 1) {
-                    ts0[tc] = 1;
-                }
-                if ((start_vt01 - vt0 * ts0[tc]).SqrLength() <= epsilon2) {
-                    ts1[tc] = 0;
-                    is_samples[tc] = true;
-                    ++tc;
-                }
-                ts1[tc] = -start_vt01.Dot(vt1) / d1;
-                if (ts1[tc] < 0) {
-                    ts1[tc] = 0;
-                }
-                if (ts1[tc] > 1) {
-                    ts1[tc] = 1;
-                }
-                if ((start_vt01 + vt1 * ts1[tc]).SqrLength() <= epsilon2) {
-                    ts0[tc] = 0;
-                    is_samples[tc] = true;
-                    ++tc;
-                }                
-                ts0[tc] = 1 + end_vt01.Dot(vt0) / d0;
-                if (ts0[tc] < 0) {
-                    ts0[tc] = 0;
-                }
-                if (ts0[tc] > 1) {
-                    ts0[tc] = 1;
-                }
-                if ((end_vt01 + vt0 * (1 - ts0[tc])).SqrLength() <= epsilon2) {
-                    ts1[tc] = 1;
-                    is_samples[tc] = true;
-                    ++tc;
-                }
-                ts1[tc] = 1 - end_vt01.Dot(vt1) / d1;
-                if (ts1[tc] < 0) {
-                    ts1[tc] = 0;
-                }
-                if (ts1[tc] > 1) {
-                    ts1[tc] = 1;
-                }
-                if ((end_vt01 - vt1 * (1 - ts1[tc])).SqrLength() <= epsilon2) {
-                    ts0[tc] = 1;
-                    is_samples[tc] = true;
-                    ++tc;
-                }
+                bool b = true;
                 double cross01 = vt0.Cross(vt1);
                 if (cross01 != 0) {
                     ts0[tc] = start_vt01.Cross(vt1) / cross01;
                     ts1[tc] = start_vt01.Cross(vt0) / cross01;
                     if (ts0[tc] >= 0 && ts0[tc] <= 1 && ts1[tc] >= 0 && ts1[tc] <= 1) {
                         is_samples[tc] = false;
+                        ++tc;
+                        b = false;
+                    }
+                }
+                if (b || ts1[0] != 0) {
+                    ts0[tc] = start_vt01.Dot(vt0) / d0;
+                    if (ts0[tc] < 0) {
+                        ts0[tc] = 0;
+                    }
+                    if (ts0[tc] > 1) {
+                        ts0[tc] = 1;
+                    }
+                    if ((start_vt01 - vt0 * ts0[tc]).SqrLength() <= epsilon2) {
+                        ts1[tc] = 0;
+                        is_samples[tc] = true;
+                        ++tc;
+                    }
+                }
+                if (b || ts0[0] != 0) {
+                    ts1[tc] = -start_vt01.Dot(vt1) / d1;
+                    if (ts1[tc] < 0) {
+                        ts1[tc] = 0;
+                    }
+                    if (ts1[tc] > 1) {
+                        ts1[tc] = 1;
+                    }
+                    if ((start_vt01 + vt1 * ts1[tc]).SqrLength() <= epsilon2) {
+                        ts0[tc] = 0;
+                        is_samples[tc] = true;
+                        ++tc;
+                    }
+                }
+                if (b || ts1[0] != 1) {
+                    ts0[tc] = 1 + end_vt01.Dot(vt0) / d0;
+                    if (ts0[tc] < 0) {
+                        ts0[tc] = 0;
+                    }
+                    if (ts0[tc] > 1) {
+                        ts0[tc] = 1;
+                    }
+                    if ((end_vt01 + vt0 * (1 - ts0[tc])).SqrLength() <= epsilon2) {
+                        ts1[tc] = 1;
+                        is_samples[tc] = true;
+                        ++tc;
+                    }
+                }
+                if (b || ts0[0] != 1) {
+                    ts1[tc] = 1 - end_vt01.Dot(vt1) / d1;
+                    if (ts1[tc] < 0) {
+                        ts1[tc] = 0;
+                    }
+                    if (ts1[tc] > 1) {
+                        ts1[tc] = 1;
+                    }
+                    if ((end_vt01 - vt1 * (1 - ts1[tc])).SqrLength() <= epsilon2) {
+                        ts0[tc] = 1;
+                        is_samples[tc] = true;
                         ++tc;
                     }
                 }
@@ -4452,7 +4462,7 @@ int WGIntersectHelper2d::LineLineIntersect(const WGVector2d& start_point0, const
                                     ts0[j] = ts0[tc];
                                     ts1[j] = ts1[tc];
                                     is_samples[j] = is_samples[tc];
-                                } 
+                                }
                             }
                             if ((start_vt01 + vt1 * ts1[i] - vt0 * ts0[i]).SqrLength() > epsilon2) {
                                 --tc;
@@ -4496,7 +4506,7 @@ int WGIntersectHelper2d::LineLineIntersect(const WGVector2d& start_point0, const
                         t11 = ts1[i];
                     }
                 }
-                bool b = false;
+                b = false;
                 double t0, t1;
                 for (int i = 0; i < tc; ++i) {
                     if (!is_samples[i]) {
