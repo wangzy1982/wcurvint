@@ -12,6 +12,7 @@ public:
     };
 
     struct Curve2d {
+        virtual ~Curve2d() {}
         CurveType Type;
     };
 
