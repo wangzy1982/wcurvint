@@ -3,7 +3,7 @@
 
 #include "wsolver.h"
 
-class WSConstCalculator : public WSTermCalculator {
+class WSOLVER_API WSConstCalculator : public WSTermCalculator {
 public:
     virtual int GetPriority() const { return 0; }
     virtual WSInterval CalculateValue(WSEquationSystem* equations, WSTerm* term, const WSIntervalVector* variable);
@@ -14,7 +14,7 @@ public:
     static WSConstCalculator Instance;
 };
 
-class WSConstBasis : public WSEquationBasis {
+class WSOLVER_API WSConstBasis : public WSEquationBasis {
 public:
     WSConstBasis();
     virtual WSTermCalculator* GetTermCalculator() const;
@@ -28,7 +28,7 @@ public:
     virtual bool Equals(WSEquationBasis* basis) const;
 };
 
-class WSPowerCalculator : public WSTermCalculator {
+class WSOLVER_API WSPowerCalculator : public WSTermCalculator {
 public:
     virtual int GetPriority() const { return 0; }
     virtual WSInterval CalculateValue(WSEquationSystem* equations, WSTerm* term, const WSIntervalVector* variable);
@@ -39,7 +39,7 @@ public:
     static WSPowerCalculator Instance;
 };
 
-class WSPowerBasis : public WSEquationBasis {
+class WSOLVER_API WSPowerBasis : public WSEquationBasis {
 public:
     WSPowerBasis(int variable_index, int power);
     int GetPower() const;
@@ -57,7 +57,7 @@ private:
     int m_power;
 };
 
-class WSMulCalculator : public WSTermCalculator {
+class WSOLVER_API WSMulCalculator : public WSTermCalculator {
 public:
     virtual int GetPriority() const { return 0; }
     virtual WSInterval CalculateValue(WSEquationSystem* equations, WSTerm* term, const WSIntervalVector* variable);
@@ -68,7 +68,7 @@ public:
     static WSMulCalculator Instance;
 };
 
-class WSMulBasis : public WSEquationBasis {
+class WSOLVER_API WSMulBasis : public WSEquationBasis {
 public:
     WSMulBasis(int variable_index0, int variable_index1);
     virtual WSTermCalculator* GetTermCalculator() const;
@@ -84,7 +84,7 @@ private:
     int m_variable_indices[2];
 };
 
-class WSSinCalculator : public WSTermCalculator {
+class WSOLVER_API WSSinCalculator : public WSTermCalculator {
 public:
     virtual int GetPriority() const { return 0; }
     virtual WSInterval CalculateValue(WSEquationSystem* equations, WSTerm* term, const WSIntervalVector* variable);
@@ -95,7 +95,7 @@ public:
     static WSSinCalculator Instance;
 };
 
-class WSSinBasis : public WSEquationBasis {
+class WSOLVER_API WSSinBasis : public WSEquationBasis {
 public:
     WSSinBasis(int variable_index);
     virtual WSTermCalculator* GetTermCalculator() const;
@@ -111,7 +111,7 @@ private:
     int m_variable_index;
 };
 
-class WSCosCalculator : public WSTermCalculator {
+class WSOLVER_API WSCosCalculator : public WSTermCalculator {
 public:
     virtual int GetPriority() const { return 0; }
     virtual WSInterval CalculateValue(WSEquationSystem* equations, WSTerm* term, const WSIntervalVector* variable);
@@ -122,7 +122,7 @@ public:
     static WSCosCalculator Instance;
 };
 
-class WSCosBasis : public WSEquationBasis {
+class WSOLVER_API WSCosBasis : public WSEquationBasis {
 public:
     WSCosBasis(int variable_index);
     virtual WSTermCalculator* GetTermCalculator() const;
@@ -138,7 +138,7 @@ private:
     int m_variable_index;
 };
 
-class WSLnCalculator : public WSTermCalculator {
+class WSOLVER_API WSLnCalculator : public WSTermCalculator {
 public:
     virtual int GetPriority() const { return 0; }
     virtual WSInterval CalculateValue(WSEquationSystem* equations, WSTerm* term, const WSIntervalVector* variable);
@@ -149,7 +149,7 @@ public:
     static WSLnCalculator Instance;
 };
 
-class WSLnBasis : public WSEquationBasis {
+class WSOLVER_API WSLnBasis : public WSEquationBasis {
 public:
     WSLnBasis(int variable_index);
     virtual WSTermCalculator* GetTermCalculator() const;
@@ -165,7 +165,7 @@ private:
     int m_variable_index;
 };
 
-class WSAbsCalculator : public WSTermCalculator {
+class WSOLVER_API WSAbsCalculator : public WSTermCalculator {
 public:
     virtual int GetPriority() const { return 0; }
     virtual WSInterval CalculateValue(WSEquationSystem* equations, WSTerm* term, const WSIntervalVector* variable);
@@ -176,7 +176,7 @@ public:
     static WSAbsCalculator Instance;
 };
 
-class WSAbsBasis : public WSEquationBasis {
+class WSOLVER_API WSAbsBasis : public WSEquationBasis {
 public:
     WSAbsBasis(int variable_index);
     virtual WSTermCalculator* GetTermCalculator() const;
@@ -192,7 +192,7 @@ private:
     int m_variable_index;
 };
 
-class WSBernsteinCalculator : public WSTermCalculator {
+class WSOLVER_API WSBernsteinCalculator : public WSTermCalculator {
 public:
     virtual int GetPriority() const { return 0; }
     virtual WSInterval CalculateValue(WSEquationSystem* equations, WSTerm* term, const WSIntervalVector* variable);
@@ -207,7 +207,7 @@ public:
     static WSBernsteinCalculator Instance;
 };
 
-class WSBernsteinBasis : public WSEquationBasis {
+class WSOLVER_API WSBernsteinBasis : public WSEquationBasis {
 public:
     WSBernsteinBasis(int variable_index, int degree);
     WSBernsteinBasis(int variable_index, int degree, const WSReal* coefs);
@@ -217,6 +217,8 @@ public:
     const WSReal* GetCoefs() const;
     WSReal CalculateValue(const WSReal& variable) const;
     WSReal CalculateDerivative(const WSReal& variable) const;
+    WSInterval CalculateValue(const WSInterval& variable) const;
+    WSInterval CalculateDerivative(const WSInterval& variable) const;
     virtual WSTermCalculator* GetTermCalculator() const;
     virtual int GetVariableCount() const;
     virtual int GetVariableIndex(int index) const;

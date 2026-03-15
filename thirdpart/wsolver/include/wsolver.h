@@ -1,6 +1,18 @@
 #ifndef _WSOLVER_
 #define _WSOLVER_
 
+#if defined(_WINDOWS)
+    #if defined(WSOLVER_EXPORTS)
+        #define WSOLVER_API __declspec(dllexport)
+    #elif defined(WSOLVER_STATIC)
+        #define WSOLVER_API
+    #else
+        #define WSOLVER_API __declspec(dllimport)
+    #endif
+#else
+    #define WSOLVER_API
+#endif
+
 #include <stdint.h>
 
 #pragma warning(push)
@@ -64,7 +76,7 @@ class WSEquation;
 
 #define WS_PI 3.14159265358979323846
 
-class WSInterval {
+class WSOLVER_API WSInterval {
 public:
     WSReal Min;
     WSReal Max;
@@ -81,36 +93,36 @@ public:
     bool IsIntersected(const WSInterval& d, const WSReal& epsilon) const;
 };
 
-WSInterval operator+(const WSInterval& d1, const WSInterval& d2);
-WSInterval operator-(const WSInterval& d);
-WSInterval operator-(const WSInterval& d1, const WSInterval& d2);
-WSInterval operator*(const WSInterval& d1, const WSInterval& d2);
-WSInterval operator*(const WSInterval& d1, const WSReal& d2);
-WSInterval operator*(const WSReal& d1, const WSInterval& d2);
-WSInterval operator/(const WSInterval& d1, const WSInterval& d2);
-WSInterval operator/(const WSInterval& d1, const WSReal& d2);
-WSInterval merge(const WSInterval& d1, const WSInterval& d2);
-WSInterval cos(const WSInterval& x);
-WSInterval sin(const WSInterval& x);
-WSInterval tan(const WSInterval& x);
-WSInterval acos(const WSInterval& x);
-WSInterval asin(const WSInterval& x);
-WSInterval atan(const WSInterval& x);
-WSInterval abs(const WSInterval& x);
-WSInterval limited_pow_1(const WSInterval& x, int y);
-WSInterval limited_pow_2(const WSInterval& x, int y);
-WSInterval pow(const WSInterval& x, int y);
-WSInterval pow(const WSInterval& x, WSReal y);
-WSInterval pow(const WSInterval& x, const WSInterval& y);
-WSInterval log(const WSInterval& x);
+WSOLVER_API WSInterval operator+(const WSInterval& d1, const WSInterval& d2);
+WSOLVER_API WSInterval operator-(const WSInterval& d);
+WSOLVER_API WSInterval operator-(const WSInterval& d1, const WSInterval& d2);
+WSOLVER_API WSInterval operator*(const WSInterval& d1, const WSInterval& d2);
+WSOLVER_API WSInterval operator*(const WSInterval& d1, const WSReal& d2);
+WSOLVER_API WSInterval operator*(const WSReal& d1, const WSInterval& d2);
+WSOLVER_API WSInterval operator/(const WSInterval& d1, const WSInterval& d2);
+WSOLVER_API WSInterval operator/(const WSInterval& d1, const WSReal& d2);
+WSOLVER_API WSInterval merge(const WSInterval& d1, const WSInterval& d2);
+WSOLVER_API WSInterval cos(const WSInterval& x);
+WSOLVER_API WSInterval sin(const WSInterval& x);
+WSOLVER_API WSInterval tan(const WSInterval& x);
+WSOLVER_API WSInterval acos(const WSInterval& x);
+WSOLVER_API WSInterval asin(const WSInterval& x);
+WSOLVER_API WSInterval atan(const WSInterval& x);
+WSOLVER_API WSInterval abs(const WSInterval& x);
+WSOLVER_API WSInterval limited_pow_1(const WSInterval& x, int y);
+WSOLVER_API WSInterval limited_pow_2(const WSInterval& x, int y);
+WSOLVER_API WSInterval pow(const WSInterval& x, int y);
+WSOLVER_API WSInterval pow(const WSInterval& x, WSReal y);
+WSOLVER_API WSInterval pow(const WSInterval& x, const WSInterval& y);
+WSOLVER_API WSInterval log(const WSInterval& x);
 
-class WSPolynomialTerm {
+class WSOLVER_API WSPolynomialTerm {
 public:
     WSInterval Coef;
     int Powers[0];
 };
 
-class WSPolynomial {
+class WSOLVER_API WSPolynomial {
 public:
     WSPolynomial(int variable_count, int term_capacity);
     virtual ~WSPolynomial();
@@ -142,6 +154,45 @@ private:
     int m_term_capacity;
 };
 
+struct WSPolynomialInfo {
+    WSPolynomial* Polynomial;
+    //int LeaderIndex;
+    //int LeaderDegree;
+    //double LeaderComplexity;
+    int Type;   //0: intermediate  1: basic  2: terminated
+};
+
+class WSPolynomialSystemElimination {
+public:
+    WSPolynomialSystemElimination(int polynomial_variable_count, int polynomial_capacity, int max_term_count,
+        int* leader_variables, int leader_variable_count);
+    ~WSPolynomialSystemElimination();
+    void AddPolynomial(WSPolynomial* polynomial);
+    int Execute(WSPolynomial**& algebra_polynomials, int& algebra_polynomial_count);
+    //int Execute(int start_polynomial_index, int recommended_leader_index);
+    int Execute();
+    int Execute(bool* sanctioned_leaders, int& start_polynomial_index);
+    int Execute(bool* sanctioned_leaders, int leader_index, int& start_polynomial_index);
+private:
+    void CalculateComplexity(WSPolynomial* polynomial, int variable_index, int& degree, int& item_count);
+    void CalculateComplexity(int start_polynomial_index, int polynomial_count, int variable_index,
+        int& polynomial_index, int& degree, double& complexity);
+    //void CalculateInfo(WSPolynomialInfo* polynomial_info, bool* sanctioned_leaders);
+private:
+    int m_max_term_count;
+    int m_polynomial_variable_count;
+    WSPolynomialInfo* m_polynomial_infos;
+    int m_polynomial_capacity;
+    int m_polynomial_count;
+    int* m_leader_variables;
+    int m_leader_variable_count;
+    WSPolynomial* m_temp_polynomial1;
+    WSPolynomial* m_temp_polynomial2;
+    WSPolynomial* m_temp_polynomial3;
+    int* m_temp_indices1;
+    int* m_temp_indices2;
+};
+
 enum class WSIterateResult {
     NoRoot,
     ClearRoot,
@@ -149,7 +200,7 @@ enum class WSIterateResult {
     Fuzzy
 };
 
-class WSEquationBasis {
+class WSOLVER_API WSEquationBasis {
 public:
     WSEquationBasis();
     virtual ~WSEquationBasis() {}
@@ -165,7 +216,7 @@ public:
     virtual bool Equals(WSEquationBasis* basis) const = 0;
 };
 
-class WSTerm {
+class WSOLVER_API WSTerm {
 public:
     WSReal GetCoef() const;
     void SetCoef(const WSReal& coef);
@@ -189,7 +240,7 @@ private:
     friend class WSTermCalculator;
 };
 
-class WSTermCalculator {
+class WSOLVER_API WSTermCalculator {
 public:
     virtual ~WSTermCalculator() {}
     virtual int GetPriority() const = 0;
@@ -199,7 +250,7 @@ public:
     virtual int GetSplitIndex(WSEquationSystem* equations, WSTerm* term, WSIntervalVector* variable) = 0;
 };
 
-class WSEquation {
+class WSOLVER_API WSEquation {
 public:
     WSEquation(WSEquationSystem* equation_system, int term_capacity, 
         bool is_check_enable, bool is_iterate_enable, bool is_linear_enable);
@@ -237,7 +288,7 @@ private:
     friend class WSTermCalculator;
 };
 
-class WSCache {
+class WSOLVER_API WSCache {
 public:
     WSCache();
     WSCache(int size);
@@ -250,7 +301,7 @@ private:
     void* m_data;
 };
 
-class WSEquationSystem {
+class WSOLVER_API WSEquationSystem {
 public:
     WSEquationSystem();
     virtual ~WSEquationSystem();
@@ -285,6 +336,11 @@ public:
     virtual WSReal GetEquationIterateEpsilon(WSEquationsCache* cache, int index) const = 0;
     virtual void BuildOriginalAlgebraEquations(const WSIntervalVector* variable_domain, 
         WSPolynomial**& polynomials, int& polynomial_count, int*& leader_variables, int& leader_variable_count, int& max_term_count) const = 0;
+    virtual void BuildAlgebraWhenEliminationFail(const WSIntervalVector* variable_domain,
+        WSPolynomial**& polynomials, int& polynomial_count) const {
+        polynomials = nullptr;
+        polynomial_count = 0;
+    };
 private:
     void RebuildIterateRuntime();
     void AddVariableIterateEquationIndex(int variable_index, int equation_index);
@@ -311,7 +367,7 @@ private:
     bool m_determined_no_root;
 };
 
-class WSVector {
+class WSOLVER_API WSVector {
 public:
     WSVector();
     WSVector(int dimension);
@@ -335,14 +391,14 @@ protected:
     WSReal* m_data;
 };
 
-class WSSliceVector : public WSVector {
+class WSOLVER_API WSSliceVector : public WSVector {
 public:
     WSSliceVector(WSCache* cache, int offset, int dimension);
     WSSliceVector(void* data, int dimension);
     virtual ~WSSliceVector();
 };
 
-class WSMatrix {
+class WSOLVER_API WSMatrix {
 public:
     WSMatrix();
     WSMatrix(int row_count, int col_count);
@@ -377,14 +433,14 @@ protected:
     WSReal* m_data;
 };
 
-class WSSliceMatrix : public WSMatrix {
+class WSOLVER_API WSSliceMatrix : public WSMatrix {
 public:
     WSSliceMatrix();
     WSSliceMatrix(WSCache* cache, int offset, int row_count, int col_count);
     virtual ~WSSliceMatrix();
 };
 
-class WSIntervalVector {
+class WSOLVER_API WSIntervalVector {
 public:
     WSIntervalVector();
     WSIntervalVector(int dimension);
@@ -403,14 +459,14 @@ protected:
     WSInterval* m_data;
 };
 
-class WSSliceIntervalVector : public WSIntervalVector {
+class WSOLVER_API WSSliceIntervalVector : public WSIntervalVector {
 public:
     WSSliceIntervalVector();
     WSSliceIntervalVector(WSCache* cache, int cache_offset, int dimension);
     virtual ~WSSliceIntervalVector();
 };
 
-class WSIntervalMatrix {
+class WSOLVER_API WSIntervalMatrix {
 public:
     WSIntervalMatrix();
     WSIntervalMatrix(int row_count, int col_count);
@@ -427,14 +483,14 @@ protected:
     WSInterval* m_data;
 };
 
-class WSSliceIntervalMatrix : public WSIntervalMatrix {
+class WSOLVER_API WSSliceIntervalMatrix : public WSIntervalMatrix {
 public:
     WSSliceIntervalMatrix();
     WSSliceIntervalMatrix(WSCache* cache, int cache_offset, int row_count, int col_count);
     virtual ~WSSliceIntervalMatrix();
 };
 
-class WSEquationsCache {
+class WSOLVER_API WSEquationsCache {
 public:
     WSEquationsCache();
     WSEquationsCache(WSEquationSystem* equations, WSIntervalVector* variable, WSIntervalVector* terms_value, 
@@ -460,7 +516,7 @@ private:
     int* m_terms_dirty_flag;
 };
 
-class WSIterator {
+class WSOLVER_API WSIterator {
 public:
     WSIterator(WSEquationSystem* equations, WSCache* cache, int cache_offset);
     static int GetCacheSize(WSEquationSystem* equations);
@@ -535,7 +591,7 @@ template<class HeapItem> void HeapPop(HeapItem* heap, int& heap_item_count) {
     HeapMoveDown(heap, heap_item_count, 0);
 }
 
-bool real_to_fraction(WSReal x, int& numerator, int& denominator, int max_denominator = 1000);
+WSOLVER_API bool real_to_fraction(WSReal x, int& numerator, int& denominator, int max_denominator = 1000);
 
 #pragma warning(pop)
 
